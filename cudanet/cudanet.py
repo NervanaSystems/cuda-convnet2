@@ -10,10 +10,7 @@ import numpy as np
 
 MAX_ONES = 1024*256
 
-cudanet_lib_path = ct.util.find_library('cconv2_cudanet')
-if cudanet_lib_path is None:
-    raise OSError("Problems locating libcudanet shared library")
-_cudanet = ct.cdll.LoadLibrary(cudanet_lib_path)
+_cudanet = ct.cdll.LoadLibrary("libcconv2_cudanet.so")
 
 
 _cudanet.get_last_cuda_error.restype = ct.c_char_p
@@ -255,7 +252,7 @@ class cudanetmat(ct.Structure):
                 ('owns_data', ct.c_int)]
 
 class rnd_struct(ct.Structure):
-    _fields_ = [('dev_rnd_mults', ct.POINTER(ct.c_uint)), 
+    _fields_ = [('dev_rnd_mults', ct.POINTER(ct.c_uint)),
                 ('dev_rnd_words', ct.POINTER(ct.c_longlong))]
 
 
@@ -479,7 +476,7 @@ class CUDAMatrix(object):
             err_code = _cudanet.assign_scalar(self.p_mat, ct.c_float(val))
         else:
             raise ValueError("Assigned value must be of type CUDAMatrix, int, or float.")
-            
+
         if err_code:
             raise generate_exception(err_code)
 
@@ -540,7 +537,7 @@ class CUDAMatrix(object):
         Subtract the dot product of m1 and m2 from the matrix, scaled by mult.
         Self is scaled by beta before subtracting anything.
         """
-        
+
         return self.add_dot(m1, m2, mult = -1. * mult, beta = beta)
     def add_mult(self, mat2, alpha = 1.):
         """
@@ -552,7 +549,7 @@ class CUDAMatrix(object):
             raise generate_exception(err_code)
 
         return self
-    
+
     def subtract_mult(self, mat2, alpha = 1.):
         """
         Subtract a multiple of mat2 from the matrix.
@@ -730,7 +727,7 @@ class CUDAMatrix(object):
         except:
             new_mat.sliceof = self
 
-        # reproduce the slice on the host as well (if requested)        
+        # reproduce the slice on the host as well (if requested)
         if include_host and self.mat.on_host:
             new_mat.numpy_array = self.numpy_array[:, first_col:last_col]
             _cudanet.set_host_mat(new_mat.p_mat, new_mat.numpy_array.ctypes.data_as(ct.POINTER(ct.c_float)))
@@ -841,7 +838,7 @@ class CUDAMatrix(object):
         if axis == 0:
             if not target:
                 target = empty((1, n))
- 
+
         elif axis == 1:
             if not target:
                 target = empty((m, 1))
@@ -1010,7 +1007,7 @@ class CUDAMatrix(object):
         if axis == 0:
             if not target:
                 target = empty((1, n))
- 
+
         elif axis == 1:
             if not target:
                 target = empty((m, 1))
@@ -1037,7 +1034,7 @@ class CUDAMatrix(object):
         if axis == 0:
             if not target:
                 target = empty((1, n))
- 
+
         elif axis == 1:
             if not target:
                 target = empty((m, 1))
@@ -1064,7 +1061,7 @@ class CUDAMatrix(object):
         if axis == 0:
             if not target:
                 target = empty((1, n))
- 
+
         elif axis == 1:
             if not target:
                 target = empty((m, 1))
@@ -1088,7 +1085,7 @@ class CUDAMatrix(object):
 
         m, n = self.shape
 
-        if not target: 
+        if not target:
             target = empty((m,n))
 
         err_code =  _cudanet.mean_norm(self.p_mat, target.p_mat, ct.c_int(axis))
@@ -1133,7 +1130,7 @@ class CUDAMatrix(object):
         if axis == 0:
             if not target:
                 target = empty((1, n))
- 
+
         elif axis == 1:
             if not target:
                 target = empty((m, 1))
@@ -1157,7 +1154,7 @@ class CUDAMatrix(object):
         if axis == 0:
             if not target:
                 target = empty((1, n))
- 
+
         elif axis == 1:
             if not target:
                 target = empty((m, 1))
@@ -1234,7 +1231,7 @@ class CUDAMatrix(object):
         """
 
         _cudanet.print_devmat(self.p_mat)
-	
+
 def empty(shape):
     """
     Creates and returns a new CUDAMatrix with the given shape.
@@ -1530,14 +1527,14 @@ def where(condition_mat, if_mat, else_mat, target = None):
 def max_pool(imgs, target, channels, sizeX, paddingStart, moduleStride, numModulesX):
     """
     Perform Max Pooling of kernel dimension sizeX on imgs and put result in target
-    Images as  (CxHxW) Rows x (N) Columns in 'C' order 
+    Images as  (CxHxW) Rows x (N) Columns in 'C' order
     Target as  (KxPxQ) Rows x (N) Colums in 'C' order
-    int imgSizeY, int numModulesX, int paddingStart, int moduleStride, 
+    int imgSizeY, int numModulesX, int paddingStart, int moduleStride,
     """
 
     err_code = _cudanet.max_pool(imgs.p_mat, target.p_mat, ct.c_int(channels),
                                  ct.c_int(sizeX), ct.c_int(paddingStart),
-                                 ct.c_int(moduleStride), ct.c_int(numModulesX)) 
+                                 ct.c_int(moduleStride), ct.c_int(numModulesX))
     if err_code:
         raise generate_exception(err_code)
 
@@ -1546,7 +1543,7 @@ def max_pool(imgs, target, channels, sizeX, paddingStart, moduleStride, numModul
 def max_pool_undo(imgs, maxGrads, maxActs, target, sizeX, paddingStart, moduleStride, numModulesX):
     """
     Undo Max Pooling of kernel dimension sizeX on imgs and put result in target
-    Images as  (CxHxW) Rows x (N) Columns in 'C' order 
+    Images as  (CxHxW) Rows x (N) Columns in 'C' order
     Target as  (KxPxQ) Rows x (N) Colums in 'C' order
     int imgSizeY, int numModulesX, int paddingStart, int moduleStride
     """
@@ -1555,7 +1552,7 @@ def max_pool_undo(imgs, maxGrads, maxActs, target, sizeX, paddingStart, moduleSt
                                       target.p_mat, ct.c_int(sizeX),
                                       ct.c_int(paddingStart),
                                       ct.c_int(moduleStride),
-                                      ct.c_int(numModulesX)) 
+                                      ct.c_int(numModulesX))
     if err_code:
         raise generate_exception(err_code)
 
@@ -1564,14 +1561,14 @@ def max_pool_undo(imgs, maxGrads, maxActs, target, sizeX, paddingStart, moduleSt
 def l2_pool(imgs, target, channels, sizeX, paddingStart, moduleStride, numModulesX):
     """
     Perform L2 Pooling of kernel dimension sizeX on imgs and put result in target
-    Images as  (CxHxW) Rows x (N) Columns in 'C' order 
+    Images as  (CxHxW) Rows x (N) Columns in 'C' order
     Target as  (KxPxQ) Rows x (N) Colums in 'C' order
-    int imgSizeY, int numModulesX, int paddingStart, int moduleStride, 
+    int imgSizeY, int numModulesX, int paddingStart, int moduleStride,
     """
 
     err_code = _cudanet.l2_pool(imgs.p_mat, target.p_mat, ct.c_int(channels),
                                  ct.c_int(sizeX), ct.c_int(paddingStart),
-                                 ct.c_int(moduleStride), ct.c_int(numModulesX)) 
+                                 ct.c_int(moduleStride), ct.c_int(numModulesX))
     if err_code:
         raise generate_exception(err_code)
 
@@ -1580,7 +1577,7 @@ def l2_pool(imgs, target, channels, sizeX, paddingStart, moduleStride, numModule
 def l2_pool_undo(imgs, l2Grads, l2Acts, target, sizeX, paddingStart, moduleStride, numModulesX):
     """
     Undo L2 Pooling of kernel dimension sizeX on imgs and put result in target
-    Images as  (CxHxW) Rows x (N) Columns in 'C' order 
+    Images as  (CxHxW) Rows x (N) Columns in 'C' order
     Target as  (KxPxQ) Rows x (N) Colums in 'C' order
     int imgSizeY, int numModulesX, int paddingStart, int moduleStride
     """
@@ -1589,7 +1586,7 @@ def l2_pool_undo(imgs, l2Grads, l2Acts, target, sizeX, paddingStart, moduleStrid
                                       target.p_mat, ct.c_int(sizeX),
                                       ct.c_int(paddingStart),
                                       ct.c_int(moduleStride),
-                                      ct.c_int(numModulesX)) 
+                                      ct.c_int(numModulesX))
     if err_code:
         raise generate_exception(err_code)
 
@@ -1598,14 +1595,14 @@ def l2_pool_undo(imgs, l2Grads, l2Acts, target, sizeX, paddingStart, moduleStrid
 def avg_pool(imgs, target, channels, sizeX, paddingStart, moduleStride, numModulesX):
     """
     Perform Max Pooling of kernel dimension sizeX on imgs and put result in target
-    Images as  (CxHxW) Rows x (N) Columns in 'C' order 
+    Images as  (CxHxW) Rows x (N) Columns in 'C' order
     Target as  (KxPxQ) Rows x (N) Colums in 'C' order
-    int imgSizeY, int numModulesX, int paddingStart, int moduleStride, 
+    int imgSizeY, int numModulesX, int paddingStart, int moduleStride,
     """
 
     err_code = _cudanet.avg_pool(imgs.p_mat, target.p_mat, ct.c_int(channels),
                                  ct.c_int(sizeX), ct.c_int(paddingStart),
-                                 ct.c_int(moduleStride), ct.c_int(numModulesX)) 
+                                 ct.c_int(moduleStride), ct.c_int(numModulesX))
     if err_code:
         raise generate_exception(err_code)
 
@@ -1614,7 +1611,7 @@ def avg_pool(imgs, target, channels, sizeX, paddingStart, moduleStride, numModul
 def avg_pool_undo(avgGrads, target, sizeX, paddingStart, moduleStride, numModulesX, imgSizeX):
     """
     Undo Avg Pooling of kernel dimension sizeX on imgs and put result in target
-    average Gradients as  (CxHxW) Rows x (N) Columns in 'C' order 
+    average Gradients as  (CxHxW) Rows x (N) Columns in 'C' order
     Target as  (KxPxQ) Rows x (N) Colums in 'C' order
     int imgSizeY, int numModulesX, int paddingStart, int moduleStride, int numImgColors, int numGroups
     """
@@ -1632,7 +1629,7 @@ def avg_pool_undo(avgGrads, target, sizeX, paddingStart, moduleStride, numModule
 def unpool_forward(smallMat, largeMat, channels, sizeX, smallX, largeX):
     """
     Undo Avg Pooling of kernel dimension sizeX on imgs and put result in target
-    average Gradients as  (CxHxW) Rows x (N) Columns in 'C' order 
+    average Gradients as  (CxHxW) Rows x (N) Columns in 'C' order
     Target as  (KxPxQ) Rows x (N) Colums in 'C' order
     int imgSizeY, int numModulesX, int paddingStart, int moduleStride, int numImgColors, int numGroups
     """
@@ -1648,7 +1645,7 @@ def unpool_forward(smallMat, largeMat, channels, sizeX, smallX, largeX):
 def unpool_backward(largeMat, smallMat, channels, sizeX, smallX, largeX):
     """
     Undo Avg Pooling of kernel dimension sizeX on imgs and put result in target
-    average Gradients as  (CxHxW) Rows x (N) Columns in 'C' order 
+    average Gradients as  (CxHxW) Rows x (N) Columns in 'C' order
     Target as  (KxPxQ) Rows x (N) Colums in 'C' order
     int imgSizeY, int numModulesX, int paddingStart, int moduleStride, int numImgColors, int numGroups
     """
@@ -1665,7 +1662,7 @@ def crossmap_response_norm(imgs, target, channels, sizeX, scale, power):
     """
     Perform response normalization across channels of kernel dimension sizeX on
     imgs and put result in target
-    Images as  (CxHxW) Rows x (N) Columns in 'C' order 
+    Images as  (CxHxW) Rows x (N) Columns in 'C' order
     Target as  (KxPxQ) Rows x (N) Colums in 'C' order
     int channels, sizeX, float scale, power
     """
@@ -1683,7 +1680,7 @@ def crossmap_response_norm(imgs, target, channels, sizeX, scale, power):
 def crossmap_response_norm_undo(imgs, respGrads, respActs, target, channels, sizeX, scale, power):
     """
     Undo response normalization of kernel dimension sizeX on imgs and put result in target
-    Images as  (CxHxW) Rows x (N) Columns in 'C' order 
+    Images as  (CxHxW) Rows x (N) Columns in 'C' order
     Target as  (KxPxQ) Rows x (N) Colums in 'C' order
     int channels, sizeX, float scale, power
     """
@@ -1704,7 +1701,7 @@ def local_contrast_norm(imgs, meanDiffs, denoms, target, imgSizeX, channels, siz
     """
     Perform contrast normalization across channels of kernel dimension sizeX on
     imgs and put result in target
-    Images as  (CxHxW) Rows x (N) Columns in 'C' order 
+    Images as  (CxHxW) Rows x (N) Columns in 'C' order
     Target as  (KxPxQ) Rows x (N) Colums in 'C' order
     int channels, sizeX, float scale, power
     """
@@ -1725,11 +1722,11 @@ def local_contrast_norm(imgs, meanDiffs, denoms, target, imgSizeX, channels, siz
 def local_contrast_norm_undo(meanDiffs, denoms, respGrads, respActs, target, channels, sizeX, scale, power):
     """
     Undo contrast normalization of kernel dimension sizeX on imgs and put result in target
-    Images as  (CxHxW) Rows x (N) Columns in 'C' order 
+    Images as  (CxHxW) Rows x (N) Columns in 'C' order
     Target as  (KxPxQ) Rows x (N) Colums in 'C' order
     int channels, sizeX, float scale, power
     """
-    err_code = _cudanet.local_contrast_norm_undo(meanDiffs.p_mat, denoms.p_mat, 
+    err_code = _cudanet.local_contrast_norm_undo(meanDiffs.p_mat, denoms.p_mat,
                                                  respGrads.p_mat,
                                                  respActs.p_mat, target.p_mat,
                                                  ct.c_int(channels),
@@ -1766,7 +1763,7 @@ def convolution(wts, imgs, target, imgSizeY, numModulesY, numModulesX,
     """
     Convolve wts with imgs and put result in target
 	Weights as (CxRxS) Rows x (K) Columns in 'C' order
-	Images as  (CxHxW) Rows x (N) Columns in 'C' order 
+	Images as  (CxHxW) Rows x (N) Columns in 'C' order
 	Target as  (KxPxQ) Rows x (N) Colums in 'C' order
     	int imgSizeY, int numModulesX, int paddingStart, int moduleStride,
         int numImgColors, int numGroups
@@ -1793,9 +1790,9 @@ def deconvolve_errors(wts, errors, target, imgSizeY, imgSizeX, numModulesY,
     """
     Backprop errors and put result in target
     Weights as (CxRxS) Rows x (K) Columns in 'C' order
-    Errors as  (KxPxQ) Rows x (N) Columns in 'C' order 
+    Errors as  (KxPxQ) Rows x (N) Columns in 'C' order
     Target as  (CxHxW) Rows x (N) Colums in 'C' order
-        int imgSizeY, ing imgSizeX, int numModulesY, int paddingStart, 
+        int imgSizeY, ing imgSizeX, int numModulesY, int paddingStart,
         int moduleStride, int numImgColors, int numGroups
     """
     err_code = _cudanet.convolution_back_errors(wts.p_mat, errors.p_mat,
@@ -1818,7 +1815,7 @@ def deconvolve_wts(hidActs, imgs, target, imgSizeY, numModulesY, numModulesX,
                    numGroups, sumWidth, doLocal=False):
     """
     Backprop acts grad with img grad to compute wts grad and put result in target
-    hidActs as  (CxHxW) Rows x (N) Columns in 'C' order 
+    hidActs as  (CxHxW) Rows x (N) Columns in 'C' order
     imgs as  (KxPxQ) Rows x (N) Colums in 'C' order
     Target as (CxRxS) Rows x (K) Columns in 'C' order
         int imgSizeY, ing numModulesY, int numModulesX, int filterSize,
@@ -1863,7 +1860,7 @@ def xcov(X, Y, target = None, normX=1, normY=1, normAll=-1):
     if (normX != 0 and normX != 1):
         raise generate_exception(-6)
     if (normY != 0 and normY != 1):
-        raise generate_exception(-6)    
+        raise generate_exception(-6)
 
     if (normAll == -1):
         normFactor = np.float32(_cudanet.get_nonleading_dimension(X.p_mat))
@@ -1896,7 +1893,7 @@ def split(mat, nsplit, axis):
     Meant to provide functionality similar to vsplit and split in numpy
     Can split along either axis -- no default provided
     Not streamed optimally at the moment, everything happens sequentially
-    each of the submats returned here have gpu buffers that are VIEWS of the 
+    each of the submats returned here have gpu buffers that are VIEWS of the
     original, they are not copied, and therefore don't "own" their data
     """
     # Check validity of axis
@@ -1986,7 +1983,7 @@ def multi_way_error(probs, labels, labellogprob, top1probs, topkprobs, topk):
 def softmax(mat, target = None, axis=0):
     if not target:
         target = empty(mat.shape)
-        
+
     err_code = _cudanet.softmax(mat.p_mat, target.p_mat, ct.c_int(axis))
     if err_code:
         raise generate_exception(err_code)
