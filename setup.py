@@ -16,7 +16,7 @@ class CMakeBuild(build_ext):
     """
     def run(self):
         build_dir = os.path.dirname(os.path.realpath(__file__))
-        for cmd, target in [("cmake", ""), ("make -C", "install")]:
+        for cmd, target in [("cmake", ""), ("make -j -C", "install")]:
             if os.system("%s %s %s" % (cmd, build_dir, target)) != 0:
                 print("ERROR: Failed to run %s" % cmd)
                 sys.exit(1)
@@ -27,7 +27,7 @@ install_requires = ['numpy', ]
 test_requires = ['nose', ]
 
 setup(name="cudanet",
-      version="0.2.5",
+      version="0.2.6",
       description="Provides a set of cudamat like functions using cuda-convnet2 kernels",
       ext_modules = [cudanet],
       packages=['cudanet'],

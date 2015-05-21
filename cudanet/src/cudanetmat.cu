@@ -1236,19 +1236,21 @@ extern int maximum_scalar(cudanetmat* mat, float val, cudanetmat* target) {
     return 0;
 }
 
-extern int reshape(cudanetmat* mat, unsigned int m, unsigned int n) {
+extern int reshape(cudanetmat* mat, cudanetmat* target, unsigned int m, unsigned int n) {
     if (mat->size[0] * mat->size[1] != m * n)
         return ERROR_INCOMPATIBLE_DIMENSIONS;
 
-    if (mat->on_device)
-        mat->data_device->resize(m,n);
-
-    mat->size[0] = m;
-    mat->size[1] = n;
-
+    if (target->owns_data && target->on_device) {
+        delete target->data_device;
+    }
+    if (mat->on_device) {
+        target->data_device = &(mat->data_device->reshaped(m,n));
+        target->on_device = 1;
+    }
+    target->size[0] = m;
+    target->size[1] = n;
     return 0;
 }
-
 
 extern int add_col_vec(cudanetmat* mat, cudanetmat* vec, cudanetmat* target) {
     if (!mat->on_device || !vec->on_device)
