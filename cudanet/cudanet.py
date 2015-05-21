@@ -352,19 +352,16 @@ class CUDAMatrix(object):
         m = ct.c_uint(shape[0])
         n = ct.c_uint(shape[1])
 
-        # Reshape the default matrix
-        err_code = _cudanet.reshape(self.p_mat, m, n)
-        if err_code:
-            raise generate_exception(err_code)
-        # Reshape the transposed matrix
-        err_code = _cudanet.reshape(self.T.p_mat, m, n)
-        if err_code:
-            raise generate_exception(err_code)
-        # Reshape the CPU matrix
-        if self.mat.on_host:
-            self.numpy_array = np.reshape(self.numpy_array, shape, order='C')
+        mat = cudanetmat()
 
-        return self
+        err_code = _cudanet.reshape(self.p_mat, ct.pointer(mat), m, n)
+
+        if err_code:
+            raise generate_exception(err_code)
+
+        new_mat = CUDAMatrix(mat)
+
+        return new_mat
 
     def asarray(self):
         """

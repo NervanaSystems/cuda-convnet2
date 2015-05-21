@@ -125,23 +125,36 @@ class TestCudanet(object):
 
         print(gpuPointer)
 
+    @attr('reshape')
     def test_reshape(self):
-        m = 256
+        m = 10
         n = 1
         cm1 = np.array(np.random.rand(n, m)*10, dtype=np.float32, order='C')
         cm2 = np.array(np.random.rand(m, n)*10, dtype=np.float32, order='C')
 
         gm1 = self.be.CUDAMatrix(cm1)
-        gm2 = self.be.CUDAMatrix(cm2)
 
-        gm1.reshape((m, n))
-        gm2.assign(gm1)
-        gm1.reshape((n, m))
+        a = gm1.reshape((2,5))
+        a.set_row_slice(0,1, 0)
 
+        cm2 = cm1.reshape((2,5))
+        cm2[0] = 0
+        cm2 = cm2.reshape(gm1.shape)
         gm1.copy_to_host()
-        gm2.copy_to_host()
 
-        assert np.max(np.abs(gm1.numpy_array - gm2.numpy_array.T)) < 10**-2, "Error in CUDAMatrix.reshape exceeded threshold"
+        assert np.max(np.abs(gm1.numpy_array - cm2)) < 10**-2, "Error in CUDAMatrix.reshape exceeded threshold"
+
+        print gm1.shape, gm1.numpy_array
+        # gm2 = self.be.CUDAMatrix(cm2)
+
+        # gm1.reshape((m, n))
+        # gm2.assign(gm1)
+        # gm1.reshape((n, m))
+
+        # gm1.copy_to_host()
+        # gm2.copy_to_host()
+
+        # assert np.max(np.abs(gm1.numpy_array - gm2.numpy_array.T)) < 10**-2, "Error in CUDAMatrix.reshape exceeded threshold"
 
     @attr('dbm')
     def test_dbm(self):

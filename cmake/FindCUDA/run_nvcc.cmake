@@ -54,6 +54,7 @@ if(NOT generated_file)
   message(FATAL_ERROR "You must specify generated_file on the command line")
 endif()
 
+cmake_policy(SET CMP0054 NEW)
 # Set these up as variables to make reading the generated file easier
 set(CMAKE_COMMAND "@CMAKE_COMMAND@") # path
 set(source_file "@source_file@") # path
