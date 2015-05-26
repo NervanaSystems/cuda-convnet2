@@ -54,7 +54,11 @@ if(NOT generated_file)
   message(FATAL_ERROR "You must specify generated_file on the command line")
 endif()
 
-cmake_policy(SET CMP0054 NEW)
+if(POLICY CMP0054)
+  cmake_policy(PUSH)
+  cmake_policy(SET CMP0054 NEW)
+endif()
+
 # Set these up as variables to make reading the generated file easier
 set(CMAKE_COMMAND "@CMAKE_COMMAND@") # path
 set(source_file "@source_file@") # path
@@ -286,4 +290,8 @@ if( build_cubin )
     -P "${CUDA_parse_cubin}"
     )
 
+endif()
+
+if(POLICY CMP0054)
+  cmake_policy(POP)
 endif()
