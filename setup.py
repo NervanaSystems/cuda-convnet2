@@ -27,7 +27,7 @@ install_requires = ['numpy', ]
 test_requires = ['nose', ]
 
 setup(name="cudanet",
-      version="0.2.6",
+      version="0.2.7",
       description="Provides a set of cudamat like functions using cuda-convnet2 kernels",
       ext_modules = [cudanet],
       packages=['cudanet'],

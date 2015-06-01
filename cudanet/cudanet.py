@@ -32,6 +32,7 @@ _cudanet.copy_on_device.restype = ct.c_int
 _cudanet.free_device_memory.restype = ct.c_int
 _cudanet.add_elementwise.restype = ct.c_int
 _cudanet.add_scalar.restype = ct.c_int
+_cudanet.add_mult.restype = ct.c_int
 _cudanet.add_vector.restype = ct.c_int
 _cudanet.mat_vector_op.restype = ct.c_int
 _cudanet.assign_scalar.restype = ct.c_int
@@ -539,12 +540,13 @@ class CUDAMatrix(object):
         """
         
         return self.add_dot(m1, m2, mult = -1. * mult, beta = beta)
-    def add_mult(self, mat2, alpha = 1.):
+
+    def add_mult(self, mat2, alpha = 1., beta = 1.):
         """
         Add multiple of mat2 to the matrix.
         """
 
-        err_code = _cudanet.add_mult(self.p_mat, mat2.p_mat, ct.c_float(alpha))
+        err_code = _cudanet.add_mult(self.p_mat, mat2.p_mat, ct.c_float(alpha), ct.c_float(beta))
         if err_code:
             raise generate_exception(err_code)
 
