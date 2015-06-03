@@ -160,6 +160,19 @@ IF(NOT CBLAS_LIBRARIES)
 ENDIF(NOT CBLAS_LIBRARIES)
 
 IF(NOT CBLAS_LIBRARIES)
+  # CBLAS in OpenBLAS library?
+  CHECK_ALL_LIBRARIES(
+    CBLAS_LIBRARIES
+    CBLAS
+    cblas_dgemm
+    ""
+    "openblas"
+    "cblas.h"
+    TRUE
+    )
+ENDIF(NOT CBLAS_LIBRARIES)
+
+IF(NOT CBLAS_LIBRARIES)
   # CBLAS in ATLAS library? (http://math-atlas.sourceforge.net/)
   CHECK_ALL_LIBRARIES(
     CBLAS_LIBRARIES
