@@ -1,3 +1,7 @@
+# DISCONTINUATION OF PROJECT #
+This project will no longer be maintained by Intel.
+Intel has ceased development and contributions including, but not limited to, maintenance, bug fixes, new releases, or updates, to this project.
+Intel no longer accepts patches to this project.
 # cuda-convnet2
 Nervana's fork of Alex Krizhevsky's
 [cuda-convnet2](https://code.google.com/p/cuda-convnet2/) containing several
